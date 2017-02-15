@@ -70,10 +70,12 @@ namespace DBControl
                             };
                             if (playerTeam > k)
                             {
+                                player.TeamId = match.TeamAId;
                                 match.TeamAPlayers.Add(player);
                             }
                             else
                             {
+                                player.TeamId = match.TeamBId;
                                 match.TeamBPlayers.Add(player);
                             }
                             matches.Add(matchId, match);
@@ -82,16 +84,10 @@ namespace DBControl
                         {
                             if(match.TeamAPlayers.Any(p => p.Id == playerId))
                             {
-                                if (playerScored != 0)
-                                {
-                                    match.TeamAPlayers.First(p => p.Id == playerId).ScoreMinutes.Add(playerScored);
-                                }
+                                player = match.TeamAPlayers.First(p => p.Id == playerId);
                             } else if(match.TeamBPlayers.Any(p => p.Id == playerId))
                             {
-                                if (playerScored != 0)
-                                {
-                                    match.TeamBPlayers.First(p => p.Id == playerId).ScoreMinutes.Add(playerScored);
-                                }
+                                player = match.TeamBPlayers.First(p => p.Id == playerId);
                             } else
                             {
                                 player = new PlayerDto
@@ -101,19 +97,21 @@ namespace DBControl
                                     TeamId = playerTeam,
                                     ScoreMinutes = new List<int>()
                                 };
-                                if (playerScored != 0)
-                                {
-                                    player.ScoreMinutes.Add(playerScored);
-                                }
                                 if (playerTeam > k)
                                 {
+                                    player.TeamId = match.TeamAId;
                                     match.TeamAPlayers.Add(player);
                                 }
                                 else
                                 {
+                                    player.TeamId = match.TeamBId;
                                     match.TeamBPlayers.Add(player);
                                 }
                             }
+                        }
+                        if (playerScored != -1)
+                        {
+                            player.ScoreMinutes.Add(playerScored);
                         }
                     }
                 }
