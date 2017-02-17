@@ -20,7 +20,7 @@ namespace DBControl
             //--Minute int not null
             //--)
             //--go
-            string sql = @"select m.Id, m.Stadium, m.TeamA, ta.Name, m.TeamAScore, m.TeamB, tb.Name, m.TeamBScore, p.Id, p.TeamId, p.Name, gsp.Minute
+            string sql = @"select m.Id, m.Stadium, m.TeamA, ta.Name, m.TeamB, tb.Name, p.Id, p.TeamId, p.Name, gsp.Minute
                 from Matches m
                  left join GemaPlayers gp on gp.MatchId = m.Id
                  left join Players p on p.Id = gp.PlayerId
@@ -40,10 +40,10 @@ namespace DBControl
                     while (reader.Read())
                     {
                         var matchId = reader.SafeGetInt32(0);
-                        var playerId = reader.SafeGetInt32(8);
-                        var playerTeam = reader.SafeGetInt32(9);
-                        var k = ((reader.SafeGetInt32(2) - reader.SafeGetInt32(5)) / 2 + reader.SafeGetInt32(5));
-                        var playerScored = reader.SafeGetInt32(11);
+                        var playerId = reader.SafeGetInt32(6);
+                        var playerTeam = reader.SafeGetInt32(7);
+                        var k = ((reader.SafeGetInt32(2) - reader.SafeGetInt32(4)) / 2 + reader.SafeGetInt32(4));
+                        var playerScored = reader.SafeGetInt32(9);
                         MatchDto match;
                         PlayerDto player;
                         if (!matches.TryGetValue(matchId, out match))
@@ -54,64 +54,32 @@ namespace DBControl
                                 Stadium = reader.GetString(1),
                                 TeamAId = reader.SafeGetInt32(2),
                                 TeamAName = reader.SafeGetString(3, "TeamB default name"),
-                                TeamAScore = reader.SafeGetInt32(4),
-                                TeamBId = reader.SafeGetInt32(5),
-                                TeamBName = reader.SafeGetString(6, "TeamB default name"),
-                                TeamBScore = reader.SafeGetInt32(7),
-                                TeamAPlayers = new List<PlayerDto>(),
-                                TeamBPlayers = new List<PlayerDto>()
+                                TeamBId = reader.SafeGetInt32(4),
+                                TeamBName = reader.SafeGetString(5, "TeamB default name"),
+                                Players = new List<PlayerDto>(),
+                                ScoredPlayers = new List<ScoresDto>()
                             };
+                            matches.Add(matchId, match);
+                        }
+                        if (!match.Players.Any(p => p.Id == playerId))
+                        {
                             player = new PlayerDto
                             {
                                 Id = playerId,
-                                Name = reader.SafeGetString(10),
-                                TeamId = playerTeam,
-                                ScoreMinutes = new List<int>()
+                                Name = reader.SafeGetString(8),
+                                TeamId = playerTeam > k ? match.TeamAId : match.TeamBId,
                             };
-                            if (playerTeam > k)
-                            {
-                                player.TeamId = match.TeamAId;
-                                match.TeamAPlayers.Add(player);
-                            }
-                            else
-                            {
-                                player.TeamId = match.TeamBId;
-                                match.TeamBPlayers.Add(player);
-                            }
-                            matches.Add(matchId, match);
-                        }
-                        else
-                        {
-                            if(match.TeamAPlayers.Any(p => p.Id == playerId))
-                            {
-                                player = match.TeamAPlayers.First(p => p.Id == playerId);
-                            } else if(match.TeamBPlayers.Any(p => p.Id == playerId))
-                            {
-                                player = match.TeamBPlayers.First(p => p.Id == playerId);
-                            } else
-                            {
-                                player = new PlayerDto
-                                {
-                                    Id = playerId,
-                                    Name = reader.SafeGetString(10),
-                                    TeamId = playerTeam,
-                                    ScoreMinutes = new List<int>()
-                                };
-                                if (playerTeam > k)
-                                {
-                                    player.TeamId = match.TeamAId;
-                                    match.TeamAPlayers.Add(player);
-                                }
-                                else
-                                {
-                                    player.TeamId = match.TeamBId;
-                                    match.TeamBPlayers.Add(player);
-                                }
-                            }
+                            match.Players.Add(player);
                         }
                         if (playerScored != -1)
                         {
-                            player.ScoreMinutes.Add(playerScored);
+                            match.ScoredPlayers.Add(new ScoresDto()
+                            {
+                                Id = playerId,
+                                Name = reader.SafeGetString(8),
+                                Minute = playerScored,
+                                TeamId = playerTeam > k ? match.TeamAId : match.TeamBId,
+                            });
                         }
                     }
                 }

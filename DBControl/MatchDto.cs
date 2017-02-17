@@ -12,12 +12,11 @@ namespace DBControl
         public string Stadium { get; set; }
         public int TeamAId { get; set; }
         public string TeamAName { get; set; }
-        public int TeamAScore { get; set; }
         public int TeamBId { get; set; }
         public string TeamBName { get; set; }
-        public int TeamBScore { get; set; }
 
-        public List<PlayerDto> TeamAPlayers { get; set; }
-        public List<PlayerDto> TeamBPlayers { get; set; }
+        public List<PlayerDto> Players { get; set; }
+
+        public List<ScoresDto> ScoredPlayers { get; set; }
     }
 }

@@ -46,6 +46,7 @@
   <ItemGroup>
     <Compile Include="ControlRepository.cs" />
     <Compile Include="MatchDto.cs" />
+    <Compile Include="ScoresDto.cs" />
     <Compile Include="SqlDataReaderExtensions.cs" />
     <Compile Include="PlayerDto.cs" />
     <Compile Include="Program.cs" />
